@@ -1,0 +1,68 @@
+<b:beans xmlns="http://www.springframework.org/schema/security"
+		 xmlns:b="http://www.springframework.org/schema/beans"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+						http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+
+	<http auto-config="true" >
+		<access-denied-handler error-page="/rest/403" />
+        <intercept-url pattern="/" access="permitAll" />
+        <intercept-url pattern="/admin**" access="hasRole('ADMIN')" />
+        <intercept-url pattern="/dba**" access="hasRole('ADMIN') and hasRole('DBA')" />
+        <intercept-url pattern="/rest/admin/*" access="hasRole('ADMIN')" />
+        <intercept-url pattern="/rest/user/*" access="hasRole('USER')"/>
+        <intercept-url pattern="/rest/login" access="permitAll"/>
+        <form-login login-page="/rest/login" 
+        			username-parameter="ssoId" 
+        			password-parameter="password" 
+        			authentication-failure-url="/rest/access_denied"
+        			default-target-url="/rest/loginSuccess" />
+        <logout success-handler-ref="myLogout" />
+        <csrf disabled="true"/>
+    </http>
+
+    
+	<authentication-manager>
+	  <authentication-provider>
+	    <!-- In Memory Authentification EXAMPLE -->
+	  	<!--<user-service>
+               <user name="bill"  password="abc123"  authorities="ROLE_USER" />
+               <user name="test"  password="test"    authorities="ROLE_USER" />
+               <user name="admin" password="root123" authorities="ROLE_ADMIN" />
+               <user name="dba"   password="root123" authorities="ROLE_ADMIN,ROLE_DBA" />
+        </user-service>-->
+        <!-- jdbc MySql Authentification -->
+        <!-- EXAMPLES -->    
+    	<!--"select username,password, enabled from users where username=?" USER-->
+	    <!--"select username, role from user_roles where username =?" AUTHORITIES-->
+	    <!--"select userID, nachname, vorname, username, email, passwort, rolle, standort from user where vorname=?" />USER2 -->
+	    <!--"select vorname, rolle from user where vorname=?" AUTHORITIES2 -->
+	    <!-- NOTE: SELECT query WHERE wildcard condition only for the column with the functionality of the login username
+	               username must always be the first column, password column must always be the second column
+	               users-by-username-query needs all columns of table in SELECT query
+	               authorities-by-username-query does not need all columns of table, but first column must be username and second column must role -->
+		<jdbc-user-service data-source-ref="dataSource"
+		  users-by-username-query=
+		    "select vorname, passwort, userID, nachname, username, email, rolle, standort from user where vorname=?"
+		  authorities-by-username-query=
+		    "select vorname, rolle from user where vorname=?" />
+	  </authentication-provider>
+	</authentication-manager>
+	
+	<b:bean id="myLogout" class="com.springmvc.controller.MyLogout">
+	</b:bean>
+	<b:bean id="mySuccessHandler" class="com.springmvc.controller.MyLogin">
+	</b:bean>
+	<!--class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler"-->
+	<b:bean id="myFailureHandler" class="com.springmvc.controller.MyFailure">
+    </b:bean>
+	
+	<!-- jdbc MySql Database beab definition -->
+	<b:bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <b:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <b:property name="url" value="jdbc:mysql://141.19.145.165:3306/testdb" />
+        <b:property name="username" value="root" />
+        <b:property name="password" value="123" />
+    </b:bean>
+
+</b:beans>
