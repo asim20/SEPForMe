@@ -1,7 +1,6 @@
 package springsecurity.configuration;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,12 +17,13 @@ public class PostLoginData {
 	@CrossOrigin
 	@ResponseStatus(HttpStatus.OK)
 	@RequestMapping(method=RequestMethod.POST)
-	public void hope(@ModelAttribute("asim") String asim,@RequestParam("ssoId") String username,@RequestParam("password") String password){
+	public String hope(/*@RequestParam("ssoId") String username,@RequestParam("password") String password*/){
 		
-		System.out.println(username+", "+password);
+//		System.out.println(username+", "+password);
 		
 		System.out.println("post Worked");
-//		return "testPost worked";
+		return "testPost worked\n"
+				+ "successfully logged in";
 	}
 	
 	@RequestMapping(method=RequestMethod.GET)
